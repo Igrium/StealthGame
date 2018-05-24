@@ -1,8 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "FPSBlackHole.h"
-#include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "PhysicsEngine/RadialForceComponent.h"
+
 #include "DrawDebugHelpers.h"
 
 // Sets default values
@@ -12,15 +13,14 @@ AFPSBlackHole::AFPSBlackHole()
 	PrimaryActorTick.bCanEverTick = true;
 
 	//Components
-	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	RootComponent = MeshComp;
 
-	OuterSphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("OuterSphere"));
-	OuterSphereComp->SetCollisionResponseToAllChannels(ECR_Overlap);
-	OuterSphereComp->SetSphereRadius(1500.0);
-	OuterSphereComp->SetupAttachment(RootComponent);
-
+	ForceComp = CreateDefaultSubobject<URadialForceComponent>(TEXT("RadialForceComponent"));
+	ForceComp->Falloff = ERadialImpulseFalloff::RIF_Linear;
+	ForceComp->Radius = 1000.0f;
+	ForceComp->ImpulseStrength = (strength*-1);
+	ForceComp->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -28,7 +28,11 @@ void AFPSBlackHole::BeginPlay()
 {
 	Super::BeginPlay();
 
-	DrawDebugSphere(GetWorld(), GetActorLocation(), OuterSphereComp->GetScaledSphereRadius(), 50, FColor::Cyan, true);
+	if (ShowDebugLines)
+	{
+		DrawDebugSphere(GetWorld(), GetActorLocation(), ForceComp->Radius, 50, FColor::Cyan, true);
+	}
+	
 }
 
 // Called every frame
@@ -36,18 +40,6 @@ void AFPSBlackHole::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	TArray<AActor*> OverlappingActors;
-	OuterSphereComp->GetOverlappingActors(OverlappingActors);
-
-	for (AActor* Target : OverlappingActors)
-	{
-		USceneComponent* RootComp = Target->GetRootComponent();
-		UStaticMeshComponent* ActorMesh = Cast<UStaticMeshComponent>(RootComp);
-		
-		if (ActorMesh)
-		{
-			ActorMesh->AddRadialForce(GetActorLocation(),OuterSphereComp->GetScaledSphereRadius(),(strength*-1),ERadialImpulseFalloff::RIF_Linear);
-		}
-	}
+	ForceComp->FireImpulse();
 }
 

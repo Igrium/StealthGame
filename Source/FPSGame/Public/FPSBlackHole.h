@@ -4,9 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "PhysicsEngine/RadialForceComponent.h"
 #include "FPSBlackHole.generated.h"
 
-class USphereComponent;
+
 
 UCLASS()
 class FPSGAME_API AFPSBlackHole : public AActor
@@ -23,15 +24,19 @@ protected:
 
 	//Variables
 	UPROPERTY(EditAnywhere, Category = "Gameplay")
-		float strength = 2000;
+		float strength = 50.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Rendering")
+		bool ShowDebugLines = false;
 
 
 	//Components
-	UPROPERTY(VisibleAnywhere, Category = "Components")
-	UStaticMeshComponent* MeshComp;
+	UPROPERTY(EditDefaultsOnly, Category = "Components")
+		UStaticMeshComponent* MeshComp;
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
-	USphereComponent* OuterSphereComp;
+		URadialForceComponent* ForceComp;
+	
 
 public:	
 	// Called every frame
