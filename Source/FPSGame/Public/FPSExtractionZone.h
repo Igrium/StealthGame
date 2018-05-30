@@ -22,7 +22,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UBoxComponent* OverlapComp;
 
-	UPROPERTY(EditAnywhere, Category = "Components")
+	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UDecalComponent* DecalComp;
 
 	UFUNCTION()
