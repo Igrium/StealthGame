@@ -29,32 +29,69 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	
+	//Blueprint
+
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UPawnSensingComponent* PawnSensingComp;
-
+	
 	UPROPERTY(EditAnywhere, Category = "AI")
 	float DelayBeforeReset;
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "AI")
+	void OnStateChanged(EAIState NewState);
+
+	UPROPERTY(BlueprintReadOnly, Category = "AI")
+	EAIState GuardState;
+
+	UPROPERTY(EditAnywhere, Category = "AI")
+	TArray<AActor*> PatrolPoints;
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "AI")
+	void OnMoveEnd();
+
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	void StartPatrol();
+
+	UPROPERTY(EditAnywhere, Category = "AI")
+	bool StartPatrolOnSpawn;
+
 	
+	
+	//AI
+
 	UFUNCTION()
 	void OnPawnSeen(APawn* SeenPawn);
 
 	UFUNCTION()
 	void OnNoiseHeard(APawn* NoiseInstigator, const FVector& Location, float Volume);
-
-	FRotator OriginalRotation;
-
+	
 	UFUNCTION()
 	void ResetOrientation();
 
+	UPROPERTY(BlueprintReadOnly, Category = "AI")
+	bool bIsFollowingPath;
+
+	AActor* Target;
+
+	int NextTargetNum;
+
+	//Internal
+
 	FTimerHandle TimerHandle_ResetOrientation;
 
-	EAIState GuardState;
+	FRotator OriginalRotation;
 
 	void SetGuardState(EAIState NewState);
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "AI")
-	void OnStateChanged(EAIState NewState);
+	void MoveToNextTarget();
+
+	bool bIsMoving;
+
+	void MoveEnd();
+
+	
+
+
 
 public:	
 	// Called every frame

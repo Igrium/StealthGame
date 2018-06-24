@@ -5,6 +5,8 @@
 #include "DrawDebugHelpers.h"
 #include "TimerManager.h"
 #include "FPSGameMode.h"
+#include "Engine/TargetPoint.h"
+#include "AIController.h"
 
 
 // Sets default values
@@ -19,7 +21,15 @@ AFPSAIGuard::AFPSAIGuard()
 	PawnSensingComp->OnHearNoise.AddDynamic(this, &AFPSAIGuard::OnNoiseHeard);
 	DelayBeforeReset = 3.0f;
 
+
 	GuardState = EAIState::Idle;
+
+	NextTargetNum = 0;
+
+	bIsMoving = false;
+	bIsFollowingPath = false;
+
+	StartPatrolOnSpawn = true;
 
 }
 
@@ -28,8 +38,11 @@ void AFPSAIGuard::BeginPlay()
 {
 	Super::BeginPlay();
 
-	OriginalRotation = GetActorRotation();
-	
+	if (StartPatrolOnSpawn)
+	{
+		StartPatrol();
+	}
+
 }
 
 void AFPSAIGuard::OnPawnSeen(APawn* SeenPawn)
@@ -60,6 +73,8 @@ void AFPSAIGuard::OnNoiseHeard(APawn* NoiseInstigator, const FVector& Location, 
 
 	DrawDebugSphere(GetWorld(), Location, 32.0f, 12, FColor::Green, false, 10.0f);
 
+	OriginalRotation = GetActorRotation();
+
 	FVector Direction = Location - GetActorLocation();
 	Direction.Normalize();
 
@@ -84,6 +99,23 @@ void AFPSAIGuard::ResetOrientation()
 	
 	SetActorRotation(OriginalRotation);
 	SetGuardState(EAIState::Idle);
+
+
+	if (bIsFollowingPath)
+	{
+		AAIController* Controller = Cast<AAIController>(GetController());
+		if (Controller  && bIsFollowingPath)
+		{
+			bIsMoving = true;
+			Controller->MoveToActor(Target);
+		}
+	}
+}
+
+void AFPSAIGuard::StartPatrol()
+{
+	bIsFollowingPath = true;
+	MoveToNextTarget();
 }
 
 
@@ -96,13 +128,62 @@ void AFPSAIGuard::SetGuardState(EAIState NewState)
 
 	GuardState = NewState;
 
+	
+	if (NewState != EAIState::Idle)
+	{
+		AAIController* Controller = Cast<AAIController>(GetController());
+		if (Controller)
+		{
+			bIsMoving = false;
+			Controller->StopMovement();
+		}
+	}
+
 	OnStateChanged(GuardState);
+}
+
+void AFPSAIGuard::MoveToNextTarget()
+{
+	AAIController* Controller = Cast<AAIController>(GetController());
+	if (Controller)
+	{
+		bIsMoving = true;
+		Target = PatrolPoints[NextTargetNum];
+		Controller->MoveToActor(Target);
+	}
+}
+
+void AFPSAIGuard::MoveEnd()
+{
+	//If at the last target move back to the first
+	if (NextTargetNum >= (PatrolPoints.Num()-1))
+	{
+		NextTargetNum = 0;
+	}
+	else
+	{
+		NextTargetNum = NextTargetNum + 1;
+	}
+
+	OnMoveEnd();
+
+	MoveToNextTarget();
 }
 
 // Called every frame
 void AFPSAIGuard::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	AAIController* Controller = Cast<AAIController>(GetController());
+	if (Controller)
+	{
+		if ((Controller->GetMoveStatus() == EPathFollowingStatus::Idle) && (bIsMoving))
+		{
+			bIsMoving = false;
+			MoveEnd();
+		}
+	}
 
 }
 
