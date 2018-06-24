@@ -50,6 +50,7 @@ void AFPSObjectiveActor::NotifyActorBeginOverlap(AActor* OtherActor)
 		if (MyCharacter)
 		{
 			MyCharacter->bIsCarryingObjective = true;
+			MyCharacter->UpdateIsCarryingObjective();
 
 			Destroy();
 		}

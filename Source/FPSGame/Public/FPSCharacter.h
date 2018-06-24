@@ -39,6 +39,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	UPawnNoiseEmitterComponent* NoiseEmitterComponent;
 
+	/** Mesh for showing if the player posesses the objective */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh")
+	UStaticMeshComponent* ObjectiveMeshComponent;
+
+
 public:
 	AFPSCharacter();
 
@@ -54,7 +59,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
 	UAnimSequence* FireAnimation;
 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Gameplay")
+	UPROPERTY(ReplicatedUsing = UpdateIsCarryingObjective, BlueprintReadOnly, Category = "Gameplay")
 	bool bIsCarryingObjective;
 
 protected:
@@ -71,9 +76,13 @@ protected:
 	/** Handles strafing movement, left and right */
 	void MoveRight(float Val);
 
+
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 
 public:
+	UFUNCTION()
+	void UpdateIsCarryingObjective();
+	
 	/** Returns Mesh1P subobject **/
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1PComponent; }
 

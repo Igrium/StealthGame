@@ -30,6 +30,15 @@ AFPSCharacter::AFPSCharacter()
 	GunMeshComponent->CastShadow = false;
 	GunMeshComponent->SetupAttachment(Mesh1PComponent, "GripPoint");
 
+	// Create the objective mesh component
+	ObjectiveMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ObjectiveMesh"));
+	ObjectiveMeshComponent->SetupAttachment(RootComponent);
+	ObjectiveMeshComponent->CastShadow = false;
+	ObjectiveMeshComponent->SetWorldScale3D(FVector(0.1f, 0.1f, 0.1f));
+	ObjectiveMeshComponent->SetVisibility(false);
+	ObjectiveMeshComponent->RelativeLocation = FVector(0, 0, 120.0f);
+
+
 	NoiseEmitterComponent = CreateDefaultSubobject<UPawnNoiseEmitterComponent>(TEXT("NoiseEmitter"));
 }
 
@@ -113,6 +122,18 @@ void AFPSCharacter::MoveRight(float Value)
 	{
 		// add movement in that direction
 		AddMovementInput(GetActorRightVector(), Value);
+	}
+}
+
+void AFPSCharacter::UpdateIsCarryingObjective()
+{
+	if (bIsCarryingObjective)
+	{
+		ObjectiveMeshComponent->SetVisibility(true);
+	}
+	else
+	{
+		ObjectiveMeshComponent->SetVisibility(false);
 	}
 }
 
