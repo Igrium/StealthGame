@@ -45,6 +45,7 @@ void AFPSAIGuard::BeginPlay()
 
 }
 
+//Fired when the guard sees a pawn
 void AFPSAIGuard::OnPawnSeen(APawn* SeenPawn)
 {
 	if (SeenPawn == nullptr)
@@ -64,6 +65,7 @@ void AFPSAIGuard::OnPawnSeen(APawn* SeenPawn)
 	
 }
 
+//Fired when the guard hears a noise
 void AFPSAIGuard::OnNoiseHeard(APawn* NoiseInstigator, const FVector& Location, float Volume)
 {
 	if (GuardState == EAIState::Alerted)
@@ -90,6 +92,7 @@ void AFPSAIGuard::OnNoiseHeard(APawn* NoiseInstigator, const FVector& Location, 
 	SetGuardState(EAIState::Suspicious);
 	
 }
+//Fired when the guard is finished being alerted
 void AFPSAIGuard::ResetOrientation()
 {
 	if (GuardState == EAIState::Alerted)
@@ -112,13 +115,14 @@ void AFPSAIGuard::ResetOrientation()
 	}
 }
 
+//Fired when the guard starts his patrol
 void AFPSAIGuard::StartPatrol()
 {
 	bIsFollowingPath = true;
 	MoveToNextTarget();
 }
 
-
+//Sets the guards ai state
 void AFPSAIGuard::SetGuardState(EAIState NewState)
 {
 	if (GuardState == NewState)
@@ -142,6 +146,7 @@ void AFPSAIGuard::SetGuardState(EAIState NewState)
 	OnStateChanged(GuardState);
 }
 
+//Moves the guard to the next target
 void AFPSAIGuard::MoveToNextTarget()
 {
 	AAIController* Controller = Cast<AAIController>(GetController());
@@ -153,6 +158,7 @@ void AFPSAIGuard::MoveToNextTarget()
 	}
 }
 
+//Fired when the guard is finished moving
 void AFPSAIGuard::MoveEnd()
 {
 	//If at the last target move back to the first
