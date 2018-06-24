@@ -7,6 +7,7 @@
 #include "FPSGameMode.h"
 #include "Engine/TargetPoint.h"
 #include "AIController.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values
@@ -115,6 +116,11 @@ void AFPSAIGuard::ResetOrientation()
 	}
 }
 
+void AFPSAIGuard::OnRep_GuardState()
+{
+	OnStateChanged(GuardState);
+}
+
 //Fired when the guard starts his patrol
 void AFPSAIGuard::StartPatrol()
 {
@@ -131,6 +137,7 @@ void AFPSAIGuard::SetGuardState(EAIState NewState)
 	}
 
 	GuardState = NewState;
+	OnRep_GuardState();
 
 	
 	if (NewState != EAIState::Idle)
@@ -142,8 +149,6 @@ void AFPSAIGuard::SetGuardState(EAIState NewState)
 			Controller->StopMovement();
 		}
 	}
-
-	OnStateChanged(GuardState);
 }
 
 //Moves the guard to the next target
@@ -193,5 +198,10 @@ void AFPSAIGuard::Tick(float DeltaTime)
 
 }
 
+void AFPSAIGuard::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	DOREPLIFETIME(AFPSAIGuard, GuardState);
+}
 

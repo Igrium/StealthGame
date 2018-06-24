@@ -40,8 +40,11 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "AI")
 	void OnStateChanged(EAIState NewState);
 
-	UPROPERTY(BlueprintReadOnly, Category = "AI")
+	UPROPERTY(ReplicatedUsing = OnRep_GuardState, BlueprintReadOnly, Category = "AI")
 	EAIState GuardState;
+
+	UFUNCTION()
+	void OnRep_GuardState();
 
 	UPROPERTY(EditAnywhere, Category = "AI")
 	TArray<AActor*> PatrolPoints;
